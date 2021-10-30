@@ -1,0 +1,30 @@
+{
+  "name": "dune",
+  "version": "1.0.0",
+  "description": "dune game",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "lint": "npx eslint --fix ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/guzus/dune.git"
+  },
+  "keywords": [
+    "dune"
+  ],
+  "author": "guzus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/guzus/dune/issues"
+  },
+  "homepage": "https://github.com/guzus/dune#readme",
+  "devDependencies": {
+    "electron": "^15.3.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.25.2"
+  }
+}
