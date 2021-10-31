@@ -5,15 +5,15 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
-    "lint": "npx eslint --fix ."
+    "start": "electron ./src/main.js",
+    "lint": "npx eslint --fix src"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/guzus/dune.git"
   },
   "keywords": [
-    "dune"
+    "dune", "spice"
   ],
   "author": "guzus",
   "license": "ISC",
@@ -26,5 +26,9 @@
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.25.2"
+  },
+  "dependencies": {
+    "electron-debug": "^3.2.0",
+    "electron-reload": "^2.0.0-alpha.1"  
   }
 }

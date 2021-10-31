@@ -1,13 +1,21 @@
 const path = require('path');
 
 const { app, BrowserWindow } = require('electron');
+require('electron-reload')(__dirname);
+const debug = require('electron-debug');
+
+debug();
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
+
     },
   });
 

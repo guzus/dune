@@ -1,7 +1,7 @@
 # Spice Rush
 
 ## Introduction
-Mine Spices. Be careful of Sandworm.
+Mine Spices. Watch out for Sandworms.
 
 ## Tech stack
 Electron
