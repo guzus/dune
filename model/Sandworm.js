@@ -35,7 +35,7 @@ class Sandworm {
     const head = this.body[0];
     let newHead = { ...head };
     // follow destination
-    const velocity = 10;
+    const velocity = 5;
     if (Math.abs(target.x - head.x) > 10) {
       newHead.x =
         head.x + ((target.x - head.x) / Math.abs(target.x - head.x)) * velocity;

@@ -60,6 +60,10 @@ class Harvester {
   draw(ctx, index = 1) {
     // TODO: sand splash
 
+    // shadow
+    ctx.shadowColor = "#c8b57b";
+    ctx.shadowBlur = 20;
+
     // rotation
     ctx.translate(this.central.x(), this.central.y());
     ctx.rotate(this.angle * Math.PI / 180);
@@ -80,6 +84,7 @@ class Harvester {
     ctx.fillRect(this.x + this.width / 2.5, this.y + this.height, this.width / 4, this.hose);
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.shadowBlur = 0;
   }
 }
 

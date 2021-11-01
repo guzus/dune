@@ -21,6 +21,7 @@ const user = {
   solariAmount: 1000,
   message: 'this is a nice day for spicing sir...',
   focusedHarvester: null,
+  gameOver: false
 };
 
 let frameCount = 0;
@@ -47,11 +48,11 @@ const updateAttributes = () => {
   updateMessage();
   updateMarket();
   // statistics
-  $('#mined_spice').text(`⛏\nspice mined : ${user.spiceAmount}`);
-  $('#solari').text(`💰\nsolari : $${user.solariAmount}`);
   $('#status').text(`👨🏻‍💼\n"${user.message}"`);
+  $('#mined_spice').text(`⛏\nspice mined :\n ${user.spiceAmount}`);
+  $('#solari').text(`💰\nsolari :\n $${user.solariAmount}`);
   $('#solariPerSpice').text(
-    `💹\nmarket : $${market.solariPerSpice} solari/spice`,
+    `💹\nmarket :\n $${market.solariPerSpice} solari/spice`,
   );
   $('#user_record').html(`🎖\nYour Record : ${Math.floor(frameCount / 180)}`);
   // controller
@@ -62,6 +63,25 @@ const updateAttributes = () => {
   $('#create_thumper').html(`<b>T</b> Create Thumper ($${market.thumper})`);
 };
 
+const calculateLeftoverSpice = () => {
+  user.spiceAmount += harvesters.reduce(
+    (prev, harvester) => prev + harvester.getMinedSpice(), 0,
+  );
+  user.solariAmount -= 1;
+}
+
+const judgeGameOver = () => {
+  if(user.solariAmount < 0) {
+    user.gameOver = true;
+    alert(`Game Over!\nYour Record : ${Math.floor(frameCount / 180)}\n`);
+  }
+}
+
+
+const listenEvents = () => {
+  // TODO: Emperor ordered Arakis to devote 10,000 spices.
+}
+
 const initInstances = () => {
   harvesters.push(new Harvester());
   sandworms.push(new Sandworm());
@@ -69,6 +89,10 @@ const initInstances = () => {
 };
 
 const animate = () => {
+  if(user.gameOver) {
+    // user.gameOver = false;
+    return;
+  }
   frameCount += 1;
   requestAnimationFrame(animate);
 
@@ -84,6 +108,10 @@ const animate = () => {
   if (frameCount % 10 === 1) {
     updateAttributes();
   }
+  
+  // event listener
+  // TODO: events like ROUND / DEAL with other empire / Pay for Emperor
+  listenEvents();
 
   // death check
   harvesters = harvesters.filter(
@@ -105,6 +133,7 @@ const animate = () => {
     },
   );
 
+  // TODO: make instances unable to get out of canvas
   // draw
   sandworms.forEach((sandworm) => sandworm.draw(ctx));
   harvesters.forEach((harvester, index) => harvester.draw(ctx, index + 1));
@@ -112,19 +141,18 @@ const animate = () => {
   carryall.draw(ctx);
 
   // move
-  if (frameCount % 20 === 0) {
+  if (frameCount % 10 === 0) {
     sandworms.forEach((sandworm) => sandworm.move());
   }
   harvesters.forEach((harvester) => harvester.move());
   carryall.move();
   thumpers.forEach((thumper) => thumper.move());
 
-  // mine
-  user.spiceAmount += harvesters.reduce(
-    (prev, harvester) => prev + harvester.getMinedSpice(), 0,
-  );
+  // calculate
+  calculateLeftoverSpice();
 
   // TODO: judge if LOSE
+  judgeGameOver();
 };
 
 initInstances();
