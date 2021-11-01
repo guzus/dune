@@ -90,7 +90,6 @@ class Carryall {
       } else {
         this.status = CARRYALL_STATUS.LANDED;
       }
-    } else {
     }
   }
 
@@ -111,10 +110,10 @@ class Carryall {
 
   movingWithTarget() {
     const { target, destination } = this;
-    if (squareOfDistance(this, destination) > 300) {
-      moveToCoordinate([this, target], destination, 1);
-    } else {
+    if (squareOfDistance(this, destination) <= 300) {
       this.status = CARRYALL_STATUS.LIFTING_DOWN;
+    } else {
+      moveToCoordinate([this, target], destination, 1);
     }
   }
 
