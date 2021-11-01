@@ -1,4 +1,5 @@
 import { HARVESTER_STATUS } from './Harvester.js';
+import { squareOfDistance, RandomCoordinate, moveToCoordinate } from './Element.js';
 
 const LIFTING_HEIGHT = 100;
 
@@ -14,9 +15,9 @@ export const CARRYALL_STATUS = {
 
 class Carryall {
   constructor() {
-    this.x = 100;
-    this.y = 100;
-    this.width = 100;
+    this.x = 500;
+    this.y = 470;
+    this.width = 150;
     this.height = 30;
     this.hoseLength = 10;
     this.hose = 0;
@@ -41,13 +42,15 @@ class Carryall {
         this.liftUp();
         break;
       case CARRYALL_STATUS.MOVING_WITH_TARGET:
-        this.liftDown();
+        this.movingWithTarget();
         break;
       case CARRYALL_STATUS.LIFTING_DOWN:
         this.liftDown();
         break;
       case CARRYALL_STATUS.MOVING_BACK:
         this.moveToLocation();
+        break;
+      default:
         break;
     }
   }
@@ -65,31 +68,30 @@ class Carryall {
     const velocity = 1;
 
     // follow destination
+    // moveToCoordinate([this], destination, velocity);
+
     if (destination.x - this.x) {
-      this.x += (destination.x - this.x) / Math.abs(destination.x - this.x) * velocity;
+      this.x
+        += ((destination.x - this.x) / Math.abs(destination.x - this.x))
+        * velocity;
     }
     if (destination.y - this.y) {
-      this.y += (destination.y - this.y) / Math.abs(destination.y - this.y) * velocity;
+      this.y
+        += ((destination.y - this.y) / Math.abs(destination.y - this.y))
+        * velocity;
     }
 
-    if (this.isCloseTo(target)) {
+    if (squareOfDistance(this, destination) < 1000) {
       this.moveAttachment();
     }
-    if (destination.x - this.x === 0 && destination.y - this.y === 0) {
+    if (squareOfDistance(this, destination) < 100) {
       if (this.status === CARRYALL_STATUS.MOVING) {
         this.status = CARRYALL_STATUS.LIFTING_UP;
       } else {
         this.status = CARRYALL_STATUS.LANDED;
       }
-      // this.liftUp(target);
+    } else {
     }
-  }
-
-  isCloseTo(target) {
-    if ((this.x - target.x) ** 2 + (this.y + this.height - target.y) ** 2 < 1000) {
-      return true;
-    }
-    return false;
   }
 
   liftUp() {
@@ -102,6 +104,16 @@ class Carryall {
       this.liftedAmount += 1;
     } else {
       this.liftedAmount = 0;
+      this.status = CARRYALL_STATUS.MOVING_WITH_TARGET;
+      this.destination = new RandomCoordinate();
+    }
+  }
+
+  movingWithTarget() {
+    const { target, destination } = this;
+    if (squareOfDistance(this, destination) > 300) {
+      moveToCoordinate([this, target], destination, 1);
+    } else {
       this.status = CARRYALL_STATUS.LIFTING_DOWN;
     }
   }
@@ -122,19 +134,31 @@ class Carryall {
   }
 
   draw(ctx) {
-
-    if (this.status in [CARRYALL_STATUS.LIFTING_DOWN, CARRYALL_STATUS.LIFTING_UP]){
+    if (
+      this.status in [CARRYALL_STATUS.LIFTING_DOWN, CARRYALL_STATUS.LIFTING_UP]
+    ) {
       ctx.fillStyle = 'black';
     } else {
       ctx.fillStyle = 'gray';
     }
-    
+
+    // body
     ctx.fillRect(this.x, this.y, this.width, this.height);
     // wing
-    ctx.fillRect(this.x + this.width/2, this.y - this.height*0.75, this.width/4, this.height*2.5);
+    ctx.fillRect(
+      this.x + this.width / 2,
+      this.y - this.height * 0.75,
+      this.width / 4,
+      this.height * 2.5,
+    );
     // attachment
     ctx.fillRect(this.x, this.y + this.height, this.width / 3, this.hose);
-    ctx.fillRect(this.x + this.width / 3 * 2, this.y + this.height, this.width / 3, this.hose);
+    ctx.fillRect(
+      this.x + (this.width / 3) * 2,
+      this.y + this.height,
+      this.width / 3,
+      this.hose,
+    );
 
     this.drawLandingSite(ctx);
   }

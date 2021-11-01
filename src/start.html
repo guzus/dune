@@ -7,28 +7,31 @@
     <title>Spice Rush</title>
   </head>
   <body>
-    <div>
+    <div class="utils">
       <a href="index.html">back to home</a>
+      <a href="start.html">restart</a>
+      <h2 id="user_record"></h2>
+      <h2 id="status"></h2>
     </div>
     <div class="statistics">
         <h2 id="mined_spice"></h2>
         <h2 id="solari"></h2>
         <h2 id="solariPerSpice"></h2>
-        <h2 id="status"></h2>
     </div>
+    
     <button class="item" id="sell_spices"><b>E</b> Sell spices</button>
     <button class="item" id="market_history"><b>P</b> Market chart</button>
 
     <div class="controller">
-        <button class="item" id="new_harvester"><b>H</b> New Harvester ($100)</button>        
-        <button class="item" id="call_helicopter"><b>C</b> Call Carryall ($80)</button>
+        <button class="item" id="new_harvester"></button>        
+        <button class="item" id="call_helicopter"></button>
         <!-- <button class="item" id="fuel_carryall">Fuel Carryall ($80)</button> -->
-        <button class="item" id="create_thumper"><b>T</b> Create Thumper ($10)</button>
+        <button class="item" id="create_thumper"></button>
     </div>
     <canvas id="canvas">
 
     </canvas>
-    <script src="./renderer.js"></script>
+    <script type="module" src="./renderer.js"></script>
     <script type="module" src="./game.js"></script>
 
   </body>

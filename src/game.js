@@ -1,5 +1,6 @@
-import { CARRYALL_STATUS, Carryall } from '../model/Carryall.js';
+import { Carryall, CARRYALL_STATUS } from '../model/Carryall.js';
 import { Harvester, HARVESTER_STATUS } from '../model/Harvester.js';
+import { Thumper, THUMPER_STATUS } from '../model/Thumper.js';
 import { Sandworm } from '../model/Sandworm.js';
 
 window.$ = window.jQuery = require('../scripts/jquery.min.js');
@@ -10,49 +11,61 @@ $('#canvas')[0].height = window.innerHeight;
 
 const market = {
   solariPerSpice: 100,
+  harvester: 1000,
+  callCarryall: 300,
+  thumper: 100,
 };
 
 const user = {
   spiceAmount: 10,
-  solariAmount: 10000,
+  solariAmount: 1000,
   message: 'this is a nice day for spicing sir...',
-};
-
-const price = {
-  createHarvester: 100,
-  callCarryall: 80,
+  focusedHarvester: null,
 };
 
 let frameCount = 0;
 
 let harvesters = [];
-let sandworms = [];
-let carryall = new Carryall();
+const sandworms = [];
+let thumpers = [];
+// TODO: spotter enlightens desert area so that harvesters can avoid sandworms
+const spotters = [];
+const carryall = new Carryall();
 
 const updateMessage = () => {
-  if(user.spiceAmount > 1000) {
-    user.message = "happy harvesting sir!"
+  if (user.spiceAmount > 1000) {
+    user.message = 'happy harvesting sir!';
   }
-}
+};
 
 const updateMarket = () => {
-  market.solariPerSpice += Math.floor(Math.random()*10-4);
-}
+  const increasedPercent = Math.floor(Math.random() * 10 - 4.4) / 3;
+  market.solariPerSpice = Math.floor(market.solariPerSpice * (1 + 0.01 * increasedPercent) + 0.5);
+};
 
 const updateAttributes = () => {
   updateMessage();
   updateMarket();
-  $('#mined_spice').text(`⛏ spice mined : ${user.spiceAmount}`);
-  $('#solari').text(`💰 solari : $${user.solariAmount}`);
-  $('#status').text(user.message);
-  $('#solariPerSpice').text(`💹 market : $${market.solariPerSpice} solari/spice`);
+  // statistics
+  $('#mined_spice').text(`⛏\nspice mined : ${user.spiceAmount}`);
+  $('#solari').text(`💰\nsolari : $${user.solariAmount}`);
+  $('#status').text(`👨🏻‍💼\n"${user.message}"`);
+  $('#solariPerSpice').text(
+    `💹\nmarket : $${market.solariPerSpice} solari/spice`,
+  );
+  $('#user_record').html(`🎖\nYour Record : ${Math.floor(frameCount / 180)}`);
+  // controller
+  $('#new_harvester').html(`<b>H</b> New Harvester ($${market.harvester})`);
+  $('#call_helicopter').html(
+    `<b>C</b> Call Carryall ($${market.callCarryall})`,
+  );
+  $('#create_thumper').html(`<b>T</b> Create Thumper ($${market.thumper})`);
 };
 
 const initInstances = () => {
-  const harvester = new Harvester();
-  harvesters.push(harvester);
-  const sandworm = new Sandworm();
-  sandworms.push(sandworm);
+  harvesters.push(new Harvester());
+  sandworms.push(new Sandworm());
+  thumpers.push(new Thumper());
 };
 
 const animate = () => {
@@ -68,93 +81,103 @@ const animate = () => {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // update attributes
-  if (frameCount % 10 === 0) {
+  if (frameCount % 10 === 1) {
     updateAttributes();
   }
 
   // death check
   harvesters = harvesters.filter(
-    (harvester) => harvester.status !== HARVESTER_STATUS.DESTROYED
+    (harvester) => harvester.status !== HARVESTER_STATUS.DESTROYED,
   );
+  thumpers = thumpers.filter(
+    (thumper) => thumper.status !== THUMPER_STATUS.DESTROYED,
+  );
+  if (!user.focusedHarvester || user.focusedHarvester.status === HARVESTER_STATUS.DESTROYED) {
+    user.focusedHarvester = harvesters[0];
+  }
 
   // retarget
   sandworms.forEach(
-    // TODO: add thumpers to candidates
     (sandworm) => {
-      if(!sandworm.target) {
-        sandworm.retarget(harvesters);
+      if (!sandworm.target) {
+        sandworm.retarget(harvesters.concat(thumpers));
       }
-    }
+    },
   );
 
   // draw
   sandworms.forEach((sandworm) => sandworm.draw(ctx));
-  harvesters.forEach((harvester) => harvester.draw(ctx));
+  harvesters.forEach((harvester, index) => harvester.draw(ctx, index + 1));
+  thumpers.forEach((thumper) => thumper.draw(ctx));
   carryall.draw(ctx);
 
+  // move
   if (frameCount % 20 === 0) {
     sandworms.forEach((sandworm) => sandworm.move());
   }
   harvesters.forEach((harvester) => harvester.move());
   carryall.move();
+  thumpers.forEach((thumper) => thumper.move());
 
-  harvesters.forEach((harvester) => user.spiceAmount += harvester.getMinedSpice());
+  // mine
+  user.spiceAmount += harvesters.reduce(
+    (prev, harvester) => prev + harvester.getMinedSpice(), 0,
+  );
+
+  // TODO: judge if LOSE
 };
 
 initInstances();
-sandworms[0].target = harvesters[0];
+sandworms.forEach((sandworm) => sandworm.retarget(harvesters));
 animate();
 
 // functions
-
 const createHarvester = () => {
-  const x = Math.random()*500, y = Math.random()*500;
-  const harvester = new Harvester(x, y);
-  harvesters.push(harvester);
-  // alert('404 harvester not found');
+  user.solariAmount -= market.harvester;
+  const [x, y] = [Math.random() * 500, Math.random() * 500];
+  harvesters.push(new Harvester(x, y));
 };
 
 const callCarryall = () => {
-  user.solariAmount -= price.callCarryall;
+  user.solariAmount -= market.callCarryall;
   carryall.status = CARRYALL_STATUS.MOVING;
-  // TODO: select target Harvester
-  carryall.target = harvesters[0];
+  carryall.target = user.focusedHarvester;
 };
 
 const createThumper = () => {
-  alert('404 to be updated');
-}
+  user.solariAmount -= market.thumper;
+  const [x, y] = [Math.random() * 500, Math.random() * 500];
+  thumpers.push(new Thumper(x, y));
+};
 
-const sellSpices = (amount=1000) => {
-  alert(`sold ${amount} spices`);
+const sellSpices = (amount = 1000) => {
+  alert(`sold ${amount} spices, @${market.solariPerSpice}`);
   user.spiceAmount -= amount;
-  user.solariAmount += market.solariPerSpice*amount;
-}
+  user.solariAmount += market.solariPerSpice * amount;
+};
 
 // listeners
-$(document).on('click', '#new_harvester', () => {
-  createHarvester();
-});
-
-$(document).on('click', '#call_helicopter', () => {
-  callCarryall();
-});
-
-$(document).on('click', '#create_thumper', () => {
-  createThumper();
-});
-
-$(document).on('click', '#sell_spices', () => {
-  sellSpices();
-});
+$(document).on('click', '#new_harvester', () => createHarvester());
+$(document).on('click', '#call_helicopter', () => callCarryall());
+$(document).on('click', '#create_thumper', () => createThumper());
+$(document).on('click', '#sell_spices', () => sellSpices());
 
 // shortcuts
 document.addEventListener('keydown', (e) => {
+  const isDigit = () => parseInt(e.key, 10) >= 1 && parseInt(e.key, 10) <= 9;
   switch (e.code) {
-    case 'Space':
-      break;
+    // case 'Space':
+    //   harvesters[0].angle += 5;
+    //   break;
     case 'Escape':
       alert('Paused. press OK to resume');
+      break;
+    case 'KeyE':
+      sellSpices();
+      break;
+    case 'KeyP':
+      // TODO: showMarketChart
+      alert('TBU');
       break;
     case 'KeyH':
       createHarvester();
@@ -167,16 +190,21 @@ document.addEventListener('keydown', (e) => {
       break;
     // move harvester
     case 'KeyW':
-      harvesters[0].y -= 3;
+      user.focusedHarvester.y -= 3;
       break;
     case 'KeyS':
-      harvesters[0].y += 3;
+      user.focusedHarvester.y += 3;
       break;
     case 'KeyD':
-      harvesters[0].x += 3;
+      user.focusedHarvester.x += 3;
       break;
     case 'KeyA':
-      harvesters[0].x -= 3;
+      user.focusedHarvester.x -= 3;
+      break;
+    default:
+      if (isDigit()) {
+        user.focusedHarvester = harvesters[parseInt(e.key, 10) - 1];
+      }
       break;
   }
 });

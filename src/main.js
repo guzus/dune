@@ -4,7 +4,9 @@ const { app, BrowserWindow } = require('electron');
 require('electron-reload')(__dirname);
 const debug = require('electron-debug');
 
-debug();
+if (process.env.NODE_ENV === 'dev') {
+  debug();
+}
 
 function createWindow() {
   const win = new BrowserWindow({
