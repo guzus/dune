@@ -9,6 +9,10 @@ const ctx = $('#canvas')[0].getContext('2d');
 $('#canvas')[0].width = window.innerWidth;
 $('#canvas')[0].height = window.innerHeight;
 
+const config = {
+  GAME_OVER_SOLARI: -1000,
+};
+
 const market = {
   solariPerSpice: 100,
   harvester: 1000,
@@ -19,12 +23,27 @@ const market = {
 const user = {
   spiceAmount: 10,
   solariAmount: 1000,
+  buyWithSpice: (price) => {
+    if (user.spiceAmount < price) {
+      alert(`Not enough spices to buy!\nYour spices : ${user.spiceAmount}`);
+      return false;
+    }
+    user.spiceAmount -= price;
+    return true;
+  },
+  buyWithSolari: (price) => {
+    if (user.solariAmount < price) {
+      alert(`Not enough solari to buy!\nYour solaris : ${user.solariAmount}`);
+      return false;
+    }
+    user.solariAmount -= price;
+    return true;
+  },
   message: 'this is a nice day for spicing sir...',
   focusedHarvester: null,
-  gameOver: false
+  gameOver: false,
+  frameCount: 0,
 };
-
-let frameCount = 0;
 
 let harvesters = [];
 const sandworms = [];
@@ -35,7 +54,13 @@ const carryall = new Carryall();
 
 const updateMessage = () => {
   if (user.spiceAmount > 1000) {
-    user.message = 'happy harvesting sir!';
+    user.message = 'Happy harvesting sir!';
+  }
+  if (user.solariAmount < 0) {
+    user.message = 'We are running out of solari, sir!';
+  }
+  if (user.solariAmount > 100000) {
+    user.message = 'My true lord!';
   }
 };
 
@@ -54,7 +79,7 @@ const updateAttributes = () => {
   $('#solariPerSpice').text(
     `💹\nmarket :\n $${market.solariPerSpice} solari/spice`,
   );
-  $('#user_record').html(`🎖\nYour Record : ${Math.floor(frameCount / 180)}`);
+  $('#user_record').html(`🎖\nYour Record : ${Math.floor(user.frameCount / 180)}`);
   // controller
   $('#new_harvester').html(`<b>H</b> New Harvester ($${market.harvester})`);
   $('#call_helicopter').html(
@@ -68,19 +93,22 @@ const calculateLeftoverSpice = () => {
     (prev, harvester) => prev + harvester.getMinedSpice(), 0,
   );
   user.solariAmount -= 1;
-}
+};
 
 const judgeGameOver = () => {
-  if(user.solariAmount < 0) {
+  if (user.solariAmount < config.GAME_OVER_SOLARI) {
     user.gameOver = true;
-    alert(`Game Over!\nYour Record : ${Math.floor(frameCount / 180)}\n`);
+    alert(`Game Over!\nYour Record : ${Math.floor(user.frameCount / 180)}\n`);
   }
-}
-
+};
 
 const listenEvents = () => {
-  // TODO: Emperor ordered Arakis to devote 10,000 spices.
-}
+  // TODO: Make events
+  if (user.frameCount === 10000) {
+    alert('Emperor ordered Arakis to devote 10,000 spices.');
+    user.spiceAmount -= 10000;
+  }
+};
 
 const initInstances = () => {
   harvesters.push(new Harvester());
@@ -89,11 +117,10 @@ const initInstances = () => {
 };
 
 const animate = () => {
-  if(user.gameOver) {
-    // user.gameOver = false;
+  if (user.gameOver) {
     return;
   }
-  frameCount += 1;
+  user.frameCount += 1;
   requestAnimationFrame(animate);
 
   // clear canvas
@@ -105,10 +132,10 @@ const animate = () => {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // update attributes
-  if (frameCount % 10 === 1) {
+  if (user.frameCount % 10 === 1) {
     updateAttributes();
   }
-  
+
   // event listener
   // TODO: events like ROUND / DEAL with other empire / Pay for Emperor
   listenEvents();
@@ -141,7 +168,7 @@ const animate = () => {
   carryall.draw(ctx);
 
   // move
-  if (frameCount % 10 === 0) {
+  if (user.frameCount % 10 === 0) {
     sandworms.forEach((sandworm) => sandworm.move());
   }
   harvesters.forEach((harvester) => harvester.move());
@@ -151,7 +178,6 @@ const animate = () => {
   // calculate
   calculateLeftoverSpice();
 
-  // TODO: judge if LOSE
   judgeGameOver();
 };
 
@@ -161,27 +187,31 @@ animate();
 
 // functions
 const createHarvester = () => {
-  user.solariAmount -= market.harvester;
-  const [x, y] = [Math.random() * 500, Math.random() * 500];
-  harvesters.push(new Harvester(x, y));
+  if (user.buyWithSolari(market.harvester)) {
+    const [x, y] = [Math.random() * 500, Math.random() * 500];
+    harvesters.push(new Harvester(x, y));
+  }
 };
 
 const callCarryall = () => {
-  user.solariAmount -= market.callCarryall;
-  carryall.status = CARRYALL_STATUS.MOVING;
-  carryall.target = user.focusedHarvester;
+  if (user.buyWithSolari(market.callCarryall)) {
+    carryall.status = CARRYALL_STATUS.MOVING;
+    carryall.target = user.focusedHarvester;
+  }
 };
 
 const createThumper = () => {
-  user.solariAmount -= market.thumper;
-  const [x, y] = [Math.random() * 500, Math.random() * 500];
-  thumpers.push(new Thumper(x, y));
+  if (user.buyWithSolari(market.thumper)) {
+    const [x, y] = [Math.random() * 500, Math.random() * 500];
+    thumpers.push(new Thumper(x, y));
+  }
 };
 
 const sellSpices = (amount = 1000) => {
-  alert(`sold ${amount} spices, @${market.solariPerSpice}`);
-  user.spiceAmount -= amount;
-  user.solariAmount += market.solariPerSpice * amount;
+  if (user.buyWithSpice(amount)) {
+    user.solariAmount += market.solariPerSpice * amount;
+    alert(`sold ${amount} spices, @${market.solariPerSpice}`);
+  }
 };
 
 // listeners

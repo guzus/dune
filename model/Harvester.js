@@ -61,7 +61,7 @@ class Harvester {
     // TODO: sand splash
 
     // shadow
-    ctx.shadowColor = "#c8b57b";
+    ctx.shadowColor = '#c8b57b';
     ctx.shadowBlur = 20;
 
     // rotation
