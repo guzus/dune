@@ -14,7 +14,7 @@ const config = {
 };
 
 const market = {
-  solariPerSpice: 100,
+  solariPerSpice: 10,
   harvester: 1000,
   callCarryall: 300,
   thumper: 100,
@@ -76,7 +76,7 @@ const updateAttributes = () => {
   updateMarket();
   // statistics
   $('#status').text(`👨🏻‍💼\n"${user.message}"`);
-  $('#mined_spice').text(`⛏\nspice mined :\n ${user.spiceAmount}`);
+  $('#mined_spice').text(`⛏\nspice mined :\n ${Math.floor(user.spiceAmount)}`);
   $('#solari').text(`💰\nsolari :\n $${user.solariAmount}`);
   $('#solariPerSpice').text(
     `💹\nmarket :\n $${market.solariPerSpice} solari/spice`,
@@ -157,7 +157,7 @@ const animate = () => {
   objects.sandworms.forEach(
     (sandworm) => {
       if (!sandworm.target) {
-        sandworm.retarget(objects.harvesters.concat(thumpers));
+        sandworm.retarget(objects.harvesters.concat(objects.thumpers));
       }
     },
   );
@@ -208,7 +208,7 @@ const createThumper = () => {
   }
 };
 
-const sellSpices = (amount = 1000) => {
+const sellSpices = (amount = 300) => {
   if (user.buyWithSpice(amount)) {
     user.solariAmount += market.solariPerSpice * amount;
     alert(`sold ${amount} spices, @${market.solariPerSpice}`);

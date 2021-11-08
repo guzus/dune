@@ -6,6 +6,8 @@ export const HARVESTER_STATUS = {
   DESTROYED: 4,
 };
 
+// TODO: spawn time
+// TODO: default solari consumption
 class Harvester {
   constructor(x = 200, y = 200) {
     this.x = x;
@@ -24,7 +26,7 @@ class Harvester {
 
   getMinedSpice() {
     if (this.status === HARVESTER_STATUS.MINING) {
-      return 1;
+      return 0.2;
     }
     return 0;
   }

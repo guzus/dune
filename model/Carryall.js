@@ -13,6 +13,7 @@ export const CARRYALL_STATUS = {
   MOVING_BACK: 6,
 };
 
+// TODO: Oil fee
 class Carryall {
   constructor() {
     this.x = 500;
