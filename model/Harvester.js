@@ -76,12 +76,23 @@ class Harvester {
     ctx.fillStyle = 'brown';
     ctx.fillRect(this.x, this.y, this.width, this.height);
     // head
-    ctx.fillRect(this.x - this.width / 3, this.y + this.height / 2, this.width / 3, this.height / 3);
+    ctx.fillRect(
+      this.x - this.width / 3, this.y + this.height / 2,
+      this.width / 3, this.height / 3,
+    );
     // leg
-    ctx.fillRect(this.x, this.y + this.height, this.width / 4, this.hoseLength);
-    ctx.fillRect(this.x + this.width / 4 * 3, this.y + this.height, this.width / 4, this.hoseLength);
+    ctx.fillRect(
+      this.x, this.y + this.height, this.width / 4, this.hoseLength,
+    );
+    ctx.fillRect(
+      this.x + this.width / 4 * 3, this.y + this.height,
+      this.width / 4, this.hoseLength,
+    );
     // hose
-    ctx.fillRect(this.x + this.width / 2.5, this.y + this.height, this.width / 4, this.hose);
+    ctx.fillRect(
+      this.x + this.width / 2.5, this.y + this.height,
+      this.width / 4, this.hose,
+    );
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.shadowBlur = 0;

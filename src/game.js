@@ -45,12 +45,14 @@ const user = {
   frameCount: 0,
 };
 
-let harvesters = [];
-const sandworms = [];
-let thumpers = [];
-// TODO: spotter enlightens desert area so that harvesters can avoid sandworms
-const spotters = [];
-const carryall = new Carryall();
+const objects = {
+  harvesters: [],
+  sandworms: [],
+  thumpers: [],
+  // TODO: spotter enlightens desert area so that harvesters can avoid sandworms
+  spotters: [],
+  carryall: new Carryall(),
+};
 
 const updateMessage = () => {
   if (user.spiceAmount > 1000) {
@@ -89,7 +91,7 @@ const updateAttributes = () => {
 };
 
 const calculateLeftoverSpice = () => {
-  user.spiceAmount += harvesters.reduce(
+  user.spiceAmount += objects.harvesters.reduce(
     (prev, harvester) => prev + harvester.getMinedSpice(), 0,
   );
   user.solariAmount -= 1;
@@ -111,9 +113,9 @@ const listenEvents = () => {
 };
 
 const initInstances = () => {
-  harvesters.push(new Harvester());
-  sandworms.push(new Sandworm());
-  thumpers.push(new Thumper());
+  objects.harvesters.push(new Harvester());
+  objects.sandworms.push(new Sandworm());
+  objects.thumpers.push(new Thumper());
 };
 
 const animate = () => {
@@ -141,39 +143,39 @@ const animate = () => {
   listenEvents();
 
   // death check
-  harvesters = harvesters.filter(
+  objects.harvesters = objects.harvesters.filter(
     (harvester) => harvester.status !== HARVESTER_STATUS.DESTROYED,
   );
-  thumpers = thumpers.filter(
+  objects.thumpers = objects.thumpers.filter(
     (thumper) => thumper.status !== THUMPER_STATUS.DESTROYED,
   );
   if (!user.focusedHarvester || user.focusedHarvester.status === HARVESTER_STATUS.DESTROYED) {
-    user.focusedHarvester = harvesters[0];
+    user.focusedHarvester = objects.harvesters[0];
   }
 
   // retarget
-  sandworms.forEach(
+  objects.sandworms.forEach(
     (sandworm) => {
       if (!sandworm.target) {
-        sandworm.retarget(harvesters.concat(thumpers));
+        sandworm.retarget(objects.harvesters.concat(thumpers));
       }
     },
   );
 
   // TODO: make instances unable to get out of canvas
   // draw
-  sandworms.forEach((sandworm) => sandworm.draw(ctx));
-  harvesters.forEach((harvester, index) => harvester.draw(ctx, index + 1));
-  thumpers.forEach((thumper) => thumper.draw(ctx));
-  carryall.draw(ctx);
+  objects.sandworms.forEach((sandworm) => sandworm.draw(ctx));
+  objects.harvesters.forEach((harvester, index) => harvester.draw(ctx, index + 1));
+  objects.thumpers.forEach((thumper) => thumper.draw(ctx));
+  objects.carryall.draw(ctx);
 
   // move
   if (user.frameCount % 10 === 0) {
-    sandworms.forEach((sandworm) => sandworm.move());
+    objects.sandworms.forEach((sandworm) => sandworm.move());
   }
-  harvesters.forEach((harvester) => harvester.move());
-  carryall.move();
-  thumpers.forEach((thumper) => thumper.move());
+  objects.harvesters.forEach((harvester) => harvester.move());
+  objects.carryall.move();
+  objects.thumpers.forEach((thumper) => thumper.move());
 
   // calculate
   calculateLeftoverSpice();
@@ -182,28 +184,27 @@ const animate = () => {
 };
 
 initInstances();
-sandworms.forEach((sandworm) => sandworm.retarget(harvesters));
+objects.sandworms.forEach((sandworm) => sandworm.retarget(objects.harvesters));
 animate();
 
-// functions
 const createHarvester = () => {
   if (user.buyWithSolari(market.harvester)) {
     const [x, y] = [Math.random() * 500, Math.random() * 500];
-    harvesters.push(new Harvester(x, y));
+    objects.harvesters.push(new Harvester(x, y));
   }
 };
 
 const callCarryall = () => {
   if (user.buyWithSolari(market.callCarryall)) {
-    carryall.status = CARRYALL_STATUS.MOVING;
-    carryall.target = user.focusedHarvester;
+    objects.carryall.status = CARRYALL_STATUS.MOVING;
+    objects.carryall.target = user.focusedHarvester;
   }
 };
 
 const createThumper = () => {
   if (user.buyWithSolari(market.thumper)) {
     const [x, y] = [Math.random() * 500, Math.random() * 500];
-    thumpers.push(new Thumper(x, y));
+    objects.thumpers.push(new Thumper(x, y));
   }
 };
 
@@ -261,7 +262,7 @@ document.addEventListener('keydown', (e) => {
       break;
     default:
       if (isDigit()) {
-        user.focusedHarvester = harvesters[parseInt(e.key, 10) - 1];
+        user.focusedHarvester = objects.harvesters[parseInt(e.key, 10) - 1];
       }
       break;
   }

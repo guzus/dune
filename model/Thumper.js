@@ -25,7 +25,10 @@ class Thumper {
     ctx.shadowBlur = 10;
     ctx.fillStyle = 'gray';
     ctx.fillRect(this.x, this.y + this.vibeHeight, this.width, this.height);
-    ctx.fillRect(this.x + this.width / 3, this.y + this.height / 3 * 2, this.width / 3, this.height / 2);
+    ctx.fillRect(
+      this.x + this.width / 3, this.y + this.height / 3 * 2,
+      this.width / 3, this.height / 2,
+    );
 
     ctx.shadowBlur = 0;
   }
