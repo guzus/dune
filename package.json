@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/guzus/dune#readme",
   "devDependencies": {
-    "electron": "^15.3.0",
+    "electron": "^15.3.5",
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.25.2"
