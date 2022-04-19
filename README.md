@@ -11,6 +11,10 @@ Electron
 ```
 npm start
 ```
+![dune_sneek_peek](https://user-images.githubusercontent.com/50664161/163993297-93532e11-8f10-4757-927b-0f9910b051c0.gif)
+
+
+
 
 ## Development mode
 ```
